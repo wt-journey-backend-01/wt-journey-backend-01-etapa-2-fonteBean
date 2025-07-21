@@ -6,8 +6,8 @@ const router = express.Router();
 router.get('/agentes', agentesController.getAgentes);
 router.get('/agentes/:id', agentesController.getAgenteById);
 router.post('/agentes', agentesController.createAgente);
-// router.put('/agentes/:id', (req,res));
-// router.patch('/agentes/:id', (req,res));
+router.put('/agentes/:id',agentesController.updateAgente);
+router.patch('/agentes/:id', agentesController.patchCaso);
 router.delete('/agentes/:id',agentesController.deleteAgente);
 
 module.exports= router;
