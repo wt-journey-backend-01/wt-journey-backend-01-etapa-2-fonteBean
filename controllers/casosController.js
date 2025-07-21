@@ -2,9 +2,33 @@ const casosRepository = require("../repositories/casosRepository.js")
 const agentesRepository = require("../repositories/agentesRepository.js")
 const {v4 : uuid} = require("uuid");
 
+
 function getCasos(req,res){
   const casos = casosRepository.findAll();
-  res.status(200).send(casos)
+  const agente_id = req.query.agente_id
+  const status = req.query.status
+
+  if(status){
+    if( status != "aberto" && status != "solucionado")
+    {
+      return  res.status(401).send("Status nao permitido ")
+    }
+    const casosStatus = casos.find(c=> c.status == status)
+    if(!casosStatus){
+     return res.status(404).send(`Casos com status ${status} nao encotrados`)
+    }
+    return res.status(200).json(casosStatus)
+  }
+
+  if(agente_id){
+    const casosAgente  = casos.find(c => c.agente_id === agente_id)
+    if(!casosAgente){
+      return res.status(404).send(`Casos do agente ${agente_id}, nao encontrados`)
+    }
+    return res.status(200).json(casosAgente)
+  }
+
+  res.status(200).json(casos)
 }
 
 function getCaso(req,res){
@@ -13,8 +37,22 @@ function getCaso(req,res){
   if(!caso){
    return  res.status(404).send("caso nao encontrado")
   }
-  res.status(200).send(caso)
+  res.status(200).json(caso)
 }
+
+function getAgentebyCaso(req,res){
+  const casoId = req.params.id;
+  const caso = casosRepository.findById(casoId);
+  if(!caso){
+   return  res.status(404).send("caso nao encontrado")
+  }
+  const agente = agentesRepository.findById(caso.agente_id)
+  if(!agente){
+   return res.status(404).send("Agente nao encontrado")
+  }
+  res.status(200).json(agente)
+}
+
 
 function createCaso(req,res){
   const {titulo ,descricao ,status, agente_id} = req.body;
@@ -38,7 +76,7 @@ function createCaso(req,res){
       agente_id
     }
     casosRepository.criarCaso(novoCaso)
-   res.status(201).send(novoCaso) 
+   res.status(201).json(novoCaso) 
 }
 
 function deleteCaso(req,res){
@@ -55,6 +93,9 @@ function deleteCaso(req,res){
 function updateCaso(req, res) {
   const casoId = req.params.id;
   const { titulo, descricao, status, agente_id } = req.body;
+  if ('id' in req.body) {
+  return res.status(400).send("Não é permitido alterar o ID do caso.");
+}
 
   if (!titulo || !descricao || !status || !agente_id) {
     return res.status(400).send("Todos os campos são obrigatórios para atualização completa.");
@@ -122,6 +163,7 @@ function patchCaso(req, res) {
 module.exports = {
   getCaso,
   getCasos,
+  getAgentebyCaso,
   createCaso,
   deleteCaso,
   updateCaso,

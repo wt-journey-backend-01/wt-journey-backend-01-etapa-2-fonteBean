@@ -6,6 +6,14 @@ const { patchCaso } = require('./casosController');
 
 function getAgentes(req,res){
   const agentes = agentesRepository.findAll();
+  const cargo = req.query.cargo
+  if(cargo){
+    const agentesComCargo = agentes.find(a=> a.cargo == cargo)
+    if(!agentesComCargo){
+      return res.status(404).send(`Agentes com cargo ${cargo} nao encontrados`)
+    }
+    res.status(200).json(agentesComCargo)
+  }
   res.status(200).json(agentes);
 }
 
@@ -53,30 +61,50 @@ function createAgente(req, res) {
 function updateAgente(req, res) {
   const agenteId = req.params.id;
   const { nome, cargo, dataDeIncorporacao } = req.body;
+
   if ('id' in req.body) {
-  return res.status(400).send("Não é permitido alterar o ID do agente.");
-}
+    return res.status(400).send("Não é permitido alterar o ID do agente.");
+  }
 
   if (!nome || !cargo || !dataDeIncorporacao) {
     return res.status(400).send("Todos os campos são obrigatórios para atualização completa.");
   }
 
-  const agente = agentesRepository.findById(agenteId);
-  if (!agente) {
+  const data = new Date(dataDeIncorporacao);
+  const agora = new Date();
+
+  if (isNaN(data.getTime())) {
+    return res.status(400).send("Data de incorporação inválida.");
+  }
+
+  if (data > agora) {
+    return res.status(400).send("Data de incorporação não pode ser no futuro.");
+  }
+
+  const agenteAtualizado = agentesRepository.updateAgente(agenteId, {
+    nome,
+    cargo,
+    dataDeIncorporacao: data,
+  });
+
+  if (!agenteAtualizado) {
     return res.status(404).send("Agente não encontrado.");
   }
-  agente.nome = nome;
-  agente.cargo = cargo;
-  agente.dataDeIncorporacao = new Date(dataDeIncorporacao);
 
-  res.status(200).json(agente);
+  res.status(200).json(agenteAtualizado);
 }
 
 function patchAgente(req, res) {
+function patchAgente(req, res) {
   const agenteId = req.params.id;
-  const { nome, cargo, dataDeIncorporacao} = req.body;
+  const { nome, cargo, dataDeIncorporacao } = req.body;
+
   if ('id' in req.body) {
-  return res.status(400).send("Não é permitido alterar o ID do agente.");
+    return res.status(400).send("Não é permitido alterar o ID do agente.");
+  }
+  if (nome === undefined && cargo === undefined && dataDeIncorporacao === undefined) {
+    return res.status(400).send("Nenhum campo válido para atualização foi enviado.");
+  }
 }
   const agente = agentesRepository.findById(agenteId);
   if (!agente) {

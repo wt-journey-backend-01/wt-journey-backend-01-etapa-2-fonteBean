@@ -4,6 +4,7 @@ const router = express.Router()
 
 router.get('/casos', casosController.getCasos);
 router.get('/casos/:id', casosController.getCaso);
+router.get('/casos/:id/agente', casosController.getAgentebyCaso);
 router.post('/casos', casosController.createCaso);
 router.put('/casos/:id', casosController.updateCaso);
 router.patch('/casos/:id', casosController.patchCaso);
