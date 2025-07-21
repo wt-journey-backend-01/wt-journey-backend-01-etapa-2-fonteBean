@@ -1,72 +1,70 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 4 créditos restantes para usar o sistema de feedback AI.
+Você tem 3 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para fonteBean:
 
-Nota final: **72.2/100**
+Nota final: **86.4/100**
 
-Olá, fonteBean! 👋 Que alegria revisar seu código! Antes de mais nada, parabéns pelo esforço e por ter entregue uma API REST com uma estrutura modular bem organizada. 🎉 Você já tem uma base sólida e isso é fundamental para continuar crescendo. Agora, vamos juntos destrinchar seu projeto para deixá-lo ainda melhor! 🚀
+Olá, fonteBean! 👋✨
 
----
-
-## 🎯 O que você mandou muito bem!
-
-- Sua estrutura de pastas está exatamente como o esperado! Você separou direitinho as rotas, controllers e repositories, o que deixa o projeto limpo e fácil de manter. Isso é um ponto super positivo! 👏
-- Os métodos HTTP para os recursos `/agentes` e `/casos` estão todos implementados, incluindo GET, POST, PUT, PATCH e DELETE.
-- Você fez um bom tratamento de erros para casos de recursos não encontrados (404) e payloads incompletos (400) em várias partes do código.
-- O uso do `uuid` para IDs únicos está correto e bem aplicado.
-- Parabéns também por implementar algumas validações e tratamento de erros personalizados, mesmo que ainda precise de ajustes.
-- Os testes bônus não passaram, mas você implementou alguns filtros e buscas, o que mostra que tentou ir além! Isso é super válido e importante para seu aprendizado. 💪
+Primeiramente, parabéns pelo esforço e dedicação nesse projeto! 🎉 Você estruturou seu código de forma organizada, com rotas, controllers e repositories bem separados, o que demonstra um bom entendimento da arquitetura modular. Além disso, implementou todos os métodos HTTP para os recursos `/agentes` e `/casos`, cuidando das validações básicas e retornando códigos de status adequados na maior parte do seu código. Isso é muito legal e mostra que você está no caminho certo! 🚀
 
 ---
 
-## 🕵️‍♂️ Vamos analisar o que precisa de atenção para você avançar com firmeza:
+## Vamos analisar juntos os pontos onde podemos melhorar? 🕵️‍♂️🔍
 
-### 1. **Validação da dataDeIncorporacao ao criar e atualizar agentes**
+### 1. Atualização completa do agente (PUT) não está funcionando corretamente
 
-Aqui está um ponto crucial que impacta várias funcionalidades, principalmente a criação e atualização de agentes.
+Vi que o teste que cria agentes (`POST /agentes`) passou, assim como o patch (atualização parcial) e a deleção. Porém, o **update completo via PUT falhou**. Ao analisar seu código no `agentesController.js`, percebi que sua função `updateAgente` está atualizando o objeto em memória, mas **não está salvando essa alteração no repositório**! 
 
-No seu controller `agentesController.js`, na função `createAgente`, você não está validando o formato da data de incorporação nem se ela está no futuro. Veja:
+Veja só:
 
 ```js
-function createAgente(req,res){
-  const {nome, cargo}  = req.body;
-  if(!nome || !cargo){
-    return res.status(400).send("Nome e Cargo sao obrigatorios")
+function updateAgente(req, res) {
+  // ...
+  const agente = agentesRepository.findById(agenteId);
+  if (!agente) {
+    return res.status(404).send("Agente não encontrado.");
   }
-  const novoAgente ={
-        id : uuidv4(),
-         nome,
-        dataDeIncorporacao: new Date(),
-        cargo
-    }
-  agentesRepository.criarAgente(novoAgente);
-  res.status(201).send(novoAgente);
+  agente.nome = nome;
+  agente.cargo = cargo;
+  agente.dataDeIncorporacao = new Date(dataDeIncorporacao);
+
+  res.status(200).json(agente);
 }
 ```
 
-- Você está definindo `dataDeIncorporacao` como `new Date()` sem permitir que o cliente envie essa informação, e também sem validar.
-- Isso impede que você valide formatos incorretos ou datas futuras.
-- Além disso, no seu `updateAgente` você exige que o campo `dataDeIncorporacao` seja enviado, mas não valida se a data está no formato correto ou se não é futura.
+Aqui, você está alterando o objeto `agente` retornado pelo `findById`, mas o array de agentes no repositório não está sendo atualizado explicitamente. Como o `findById` retorna uma referência ao objeto dentro do array (porque objetos são passados por referência em JS), isso pode funcionar, mas é uma prática mais segura e clara usar um método no repository para atualizar o agente, garantindo a manutenção da integridade dos dados.
 
-**Por que isso é importante?**  
-Sem essa validação, você pode acabar armazenando datas inválidas, o que prejudica a integridade dos dados e pode causar problemas em filtros e ordenações futuras.
+**Sugestão:** Crie um método `updateAgente` no seu `agentesRepository.js` que receba o id e os dados atualizados, e faça a substituição no array. Assim, seu controller fica mais limpo e a responsabilidade de manipular os dados fica no repository, conforme a arquitetura proposta.
 
-**Como corrigir?**  
-Permita que o cliente envie `dataDeIncorporacao` no formato esperado (por exemplo, uma string ISO ou `YYYY-MM-DD`), e valide se:
-
-- A data é válida (não um valor qualquer)
-- A data não é futura
-
-Exemplo de validação simples:
+Exemplo para o repository:
 
 ```js
-function createAgente(req, res) {
+function updateAgente(id, dadosAtualizados) {
+  const index = agentes.findIndex(a => a.id === id);
+  if (index !== -1) {
+    agentes[index] = { ...agentes[index], ...dadosAtualizados };
+    return agentes[index];
+  }
+  return null;
+}
+```
+
+E no controller:
+
+```js
+function updateAgente(req, res) {
+  const agenteId = req.params.id;
   const { nome, cargo, dataDeIncorporacao } = req.body;
 
+  if ('id' in req.body) {
+    return res.status(400).send("Não é permitido alterar o ID do agente.");
+  }
+
   if (!nome || !cargo || !dataDeIncorporacao) {
-    return res.status(400).send("Nome, Cargo e dataDeIncorporacao são obrigatórios.");
+    return res.status(400).send("Todos os campos são obrigatórios para atualização completa.");
   }
 
   const data = new Date(dataDeIncorporacao);
@@ -80,159 +78,161 @@ function createAgente(req, res) {
     return res.status(400).send("Data de incorporação não pode ser no futuro.");
   }
 
-  const novoAgente = {
-    id: uuidv4(),
+  const agenteAtualizado = agentesRepository.updateAgente(agenteId, {
     nome,
     cargo,
     dataDeIncorporacao: data,
-  };
+  });
 
-  agentesRepository.criarAgente(novoAgente);
-  res.status(201).json(novoAgente);
+  if (!agenteAtualizado) {
+    return res.status(404).send("Agente não encontrado.");
+  }
+
+  res.status(200).json(agenteAtualizado);
 }
 ```
 
-👉 Para entender melhor sobre validação de dados e tratamento de erros, recomendo este vídeo super didático:  
-https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_  
+Assim, você garante que o array é atualizado corretamente e evita efeitos colaterais inesperados. Isso pode ser a causa do problema no PUT.
 
 ---
 
-### 2. **Impedir alteração do ID do agente (PUT e PATCH)**
+### 2. Validação incorreta no PATCH para agentes com payload inválido
 
-No seu código, tanto no `updateAgente` quanto no `patchAgente`, você não impede que o campo `id` seja alterado. Isso é um problema porque o ID deve ser imutável, pois identifica unicamente cada agente.
+Você mencionou que o teste que verifica se o PATCH retorna erro 400 quando o payload está mal formatado falhou. Ao olhar seu código de `patchAgente`, notei que você só verifica se o campo `id` está presente para bloquear a alteração, mas não há validação se o payload está vazio ou com campos inválidos. 
 
-Exemplo do problema no `updateAgente` (não tem verificação para o campo `id`):
+Por exemplo, se o corpo da requisição for `{}`, seu código não retorna erro, mas deveria, pois não há dados para atualizar.
+
+Você pode melhorar adicionando uma validação para garantir que o corpo da requisição tenha pelo menos um campo válido para atualizar:
 
 ```js
-function updateAgente(req, res) {
+function patchAgente(req, res) {
   const agenteId = req.params.id;
   const { nome, cargo, dataDeIncorporacao } = req.body;
 
-  // Não verifica se req.body.id existe e tenta alterar o id
-  // ...
+  if ('id' in req.body) {
+    return res.status(400).send("Não é permitido alterar o ID do agente.");
+  }
+
+  // Verifica se algum campo válido foi enviado
+  if (nome === undefined && cargo === undefined && dataDeIncorporacao === undefined) {
+    return res.status(400).send("Nenhum campo válido para atualização foi enviado.");
+  }
+
+  // Resto do código...
 }
 ```
 
-**Como corrigir?**  
-Antes de atualizar o agente, ignore ou rejeite qualquer tentativa de alterar o `id`. Você pode fazer assim:
-
-```js
-if ('id' in req.body) {
-  return res.status(400).send("Não é permitido alterar o ID do agente.");
-}
-```
-
-Coloque isso no início da função para garantir que o ID não seja modificado.
+Essa validação simples evita que o PATCH aceite payloads vazios ou inválidos, alinhando-se ao esperado.
 
 ---
 
-### 3. **Validação incorreta no método `updateCaso`**
+### 3. Penalidade: alteração do ID do caso com PUT
 
-No seu `casosController.js`, a validação do método PUT está com um pequeno erro lógico:
+No seu `casosController.js`, percebi que no método `updateCaso` você não está bloqueando a alteração do campo `id`. Isso é problemático, porque o ID deve ser imutável.
+
+Veja trecho do seu código:
 
 ```js
 function updateCaso(req, res) {
   const casoId = req.params.id;
   const { titulo, descricao, status, agente_id } = req.body;
 
-  if (!titulo || !descricao || !status || agente_id) {
+  if (!titulo || !descricao || !status || !agente_id) {
     return res.status(400).send("Todos os campos são obrigatórios para atualização completa.");
   }
-  // ...
+
+  const caso = casosRepository.findById(casoId);
+  if (!caso) {
+    return res.status(404).send("caso não encontrado.");
+  }
+
+  if( status != "aberto" && status != "solucionado") {
+    return  res.status(400).send("Status nao permitido ")
+  }
+
+  // Aqui você atualiza os campos, mas não verifica se o 'id' foi alterado
+  caso.titulo = titulo;
+  caso.descricao = descricao;
+  caso.status = status;
+  caso.agente_id = agente_id;
+
+  res.status(200).json(caso);
 }
 ```
 
-Repare que o teste `if (!titulo || !descricao || !status || agente_id)` está errando ao verificar `agente_id`. Ele deveria ser `!agente_id` para validar a obrigatoriedade do campo.
-
-**Correção:**
+**O que fazer?** Antes de atualizar, verifique se o corpo da requisição contém o campo `id` e, se sim, retorne erro 400:
 
 ```js
-if (!titulo || !descricao || !status || !agente_id) {
-  return res.status(400).send("Todos os campos são obrigatórios para atualização completa.");
+if ('id' in req.body) {
+  return res.status(400).send("Não é permitido alterar o ID do caso.");
 }
 ```
 
-Esse pequeno detalhe faz com que o servidor aceite payloads incompletos e não retorne o erro esperado.
+Assim, você protege a integridade do recurso e evita penalizações.
 
 ---
 
-### 4. **Status HTTP incorreto para status inválido de caso**
+### 4. Filtros e recursos bônus ainda não implementados
 
-Você está usando o código `401 Unauthorized` para indicar que o campo `status` do caso não é permitido:
+Você tentou implementar filtros para casos e agentes, ordenação e mensagens de erro customizadas, mas esses pontos ainda não estão completos ou corretos. Isso é normal, pois são funcionalidades extras que exigem um pouco mais de lógica.
+
+Se quiser, posso te ajudar com dicas para implementar filtros usando query params, por exemplo:
 
 ```js
-if( status != "aberto" && status != "solucionado") {
-  return res.status(401).send("Status nao permitido ")
+// Exemplo simples de filtro por status no getCasos
+function getCasos(req, res) {
+  const { status } = req.query;
+  let casos = casosRepository.findAll();
+
+  if (status) {
+    casos = casos.filter(caso => caso.status === status);
+  }
+
+  res.status(200).json(casos);
 }
 ```
 
-O código 401 é para autenticação, não para dados inválidos.
-
-**O certo seria usar o código 400 (Bad Request)** para indicar que o cliente enviou um dado inválido.
-
-Exemplo corrigido:
-
-```js
-if (status !== "aberto" && status !== "solucionado") {
-  return res.status(400).send("Status não permitido.");
-}
-```
+Assim, você já começa a abrir portas para o bônus! 💪
 
 ---
 
-### 5. **Falta de validações mais robustas para dataDeIncorporacao no PATCH**
+### 5. Estrutura de diretórios e organização
 
-No `patchAgente`, você já faz uma validação melhor da data, mas ela só acontece se o campo for enviado. Isso está correto, mas veja que no `createAgente` e no `updateAgente` essa validação está ausente ou incompleta.
-
-Para manter consistência, o ideal é centralizar essa validação em uma função utilitária, para evitar duplicação e erros.
+Sua estrutura de diretórios está exatamente como o esperado! 👏 Isso é fundamental para manter o projeto escalável e fácil de manter. Parabéns por seguir a arquitetura modular com pastas separadas para `routes`, `controllers` e `repositories`.
 
 ---
 
-### 6. **Filtros e buscas bônus não implementados**
+## Recursos que recomendo para você aprofundar esses pontos:
 
-Você tentou implementar filtros para os casos e agentes, mas eles não passaram. Isso indica que ainda faltam endpoints ou parâmetros para filtrar por status, agente responsável, palavras-chave ou ordenar por data de incorporação.
+- Para entender melhor a manipulação de dados em memória e atualizar objetos em arrays:  
+  https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI
 
-Esse é um ótimo próximo passo para evoluir sua API e deixá-la mais completa! Para isso, recomendo estudar mais sobre query params e filtragem no Express:
+- Para reforçar a validação de dados e tratamento de erros em APIs Node.js com Express:  
+  https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_
 
-- Documentação oficial de rotas no Express: https://expressjs.com/pt-br/guide/routing.html  
-- Vídeo sobre manipulação de query strings: https://youtu.be/--TQwiNIw28  
+- Para compreender melhor os métodos HTTP e seus usos corretos (PUT, PATCH, etc):  
+  https://youtu.be/RSZHvQomeKE
 
----
-
-## 🛠️ Pequenos ajustes que podem melhorar seu código:
-
-- No `deleteAgente` e `deleteCaso`, você busca o índice do item para deletar. Isso é ok, mas uma abordagem mais limpa é criar uma função no repository que receba o `id` e faça a remoção internamente, evitando expor detalhes do array para o controller.
-- No seu `createCaso`, quando o payload está inválido, você esqueceu de colocar `return` antes do `res.status(400).send(...)`, o que pode gerar comportamento inesperado.
+- Para aprender a implementar filtros usando query params e organizar suas rotas:  
+  https://expressjs.com/pt-br/guide/routing.html
 
 ---
 
-## 📚 Recursos que vão te ajudar a avançar muito:
+## Resumo rápido dos pontos para focar:
 
-- Validação de dados e tratamento de erros: https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_  
-- Fundamentos de API REST e Express.js: https://youtu.be/RSZHvQomeKE  
-- Documentação oficial Express sobre rotas: https://expressjs.com/pt-br/guide/routing.html  
-- Manipulação de query strings e filtros: https://youtu.be/--TQwiNIw28  
-
----
-
-## 📝 Resumo rápido dos pontos para focar:
-
-- [ ] Validar corretamente `dataDeIncorporacao` na criação e atualização de agentes (formato válido, não futuro).
-- [ ] Impedir alteração do campo `id` nos métodos PUT e PATCH.
-- [ ] Corrigir validação do payload no método `updateCaso` para checar `!agente_id`.
-- [ ] Usar status HTTP 400 para dados inválidos (ex: status do caso), não 401.
-- [ ] Centralizar validações para evitar duplicação e inconsistências.
-- [ ] Implementar corretamente filtros e buscas para casos e agentes (query params).
-- [ ] Revisar retornos de erro para garantir que sempre use `return` para evitar múltiplos envios de resposta.
-- [ ] Refatorar exclusão para que repositories façam a remoção pelo `id`, mantendo controllers mais limpos.
+- [ ] Criar métodos de atualização (`updateAgente`, `updateCaso`) no repository para garantir integridade na alteração dos dados.  
+- [ ] Proteger os campos `id` para que não sejam alterados via PUT ou PATCH.  
+- [ ] Validar payloads vazios ou incorretos, especialmente no PATCH, para retornar erro 400 quando necessário.  
+- [ ] Implementar filtros simples com query params para casos e agentes, abrindo caminho para os bônus.  
+- [ ] Continuar validando datas e status para garantir entradas corretas.
 
 ---
 
-FonteBean, você está no caminho certo! 👏 Seu código está organizado e você já domina muitos conceitos importantes. Com esses ajustes, sua API vai ficar muito mais robusta, alinhada com boas práticas e pronta para crescer ainda mais. Continue firme, aprendendo e testando! 💪
+Você está muito bem encaminhado, fonteBean! 💪 Com essas melhorias, sua API vai ficar mais robusta, confiável e alinhada às boas práticas do desenvolvimento RESTful. Continue praticando, revisando e testando seu código, pois a evolução vem com a persistência. 🚀
 
-Se precisar de ajuda para implementar qualquer uma dessas melhorias, me chama que a gente resolve junto! 😉
+Se precisar de ajuda para implementar algum desses pontos, só chamar! Estou aqui para te ajudar a brilhar! ✨👨‍💻👩‍💻
 
-Abraço e até a próxima revisão! 🚓👮‍♂️✨
+Um abraço e até a próxima revisão! 🤗🌟
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
