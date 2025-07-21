@@ -3,6 +3,10 @@ const agentes = [];
 function findAll(){
   return agentes;
 }
+function findById(id) {
+  const agente = agentes.find(a => a.id === id);
+  return agente;
+}
 
 function criarAgente(agente){
   agentes.push(agente);
@@ -16,5 +20,7 @@ function deleteAgente(index){
 
 module.exports  = {
   findAll,
-  findById
+  findById,
+  criarAgente,
+  deleteAgente
 }

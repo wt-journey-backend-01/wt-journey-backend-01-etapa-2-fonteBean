@@ -1,64 +1,19 @@
 const express = require('express')
 const morgan = require('morgan')
-const { v4: uuid} = require('uuid')
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+
+
+
+const agentesRoutes = require("./routes/agentesRoutes.js")
+
+
 app.use(morgan('common'));
+app.use(express.json());
+app.use(express.urlencoded({extended: true}))
 
-
-// Agentes
-
-var nextId = 1;
-app.get("/agentes", (req,res) =>{
-    res.status(200).json(agentes);
-})
-
-
-app.post("/agentes", (req,res)=>{
-
-    const {nome, cargo} = req.body;
-    if(!nome || !cargo){
-        return res.status(400).json({
-            status: 400,
-            message: "dados incompletos"
-        })
-    }
-    const novoAgente ={
-        id : nextId++,
-         nome,
-        dataDeIncorporacao: new Date(),
-        cargo
-    }
-    agentes.push(novoAgente);
-    res.status(201).json(novoAgente)
-
-})
-
-app.get('/agentes/:id', (req,res)=>{
-    const agentId = parseInt(req.params.id);
-    const agent = agentes.find(a => a.id === agentId);
-    
-    if(!agent){
-       return res.status(404).send("Agente nao encontrado");
-    }
-     res.status(200).json(agent);
-})
-
-
-app.delete('/agentes/:id', (req,res)=>{
-    const agentId = parseInt(req.params.id);
-    const agentIndex = agentes.findIndex(a => a.id === agentId);
-    
-    if(!agentIndex){
-       return res.status(404).send("Agente nao encontrado");
-    }
-    agentes.splice(agentIndex, 1)
-     res.status(204).send();
-})
-
-
+app.use(agentesRoutes);
 // Casos
 const casos = [];
 var nextId = 1;
