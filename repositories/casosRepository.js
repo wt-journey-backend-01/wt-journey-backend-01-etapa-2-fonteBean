@@ -1,21 +1,26 @@
+const casos = [];
 
-function findAll() {
-    return casos
+function findAll(){
+  return casos;
 }
-
 function findById(id) {
-  try{
-    casos.forEach(caso => {
-      if (caso["id"] == id){
-        return caso;
-      }
-    });
-  }catch(error){
-
-  }
+  const caso = casos.find(a => a.id === id);
+  return caso;
 }
 
-module.exports = {
-    findAll
+function criarCaso(caso){
+  casos.push(caso);
+}
 
+function deleteCaso(index){
+  casos.splice(index, 1)
+}
+
+
+
+module.exports  = {
+  findAll,
+  findById,
+  criarCaso,
+  deleteCaso
 }

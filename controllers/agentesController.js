@@ -41,10 +41,10 @@ function deleteAgente(req,res){
     const agenteId =req.params.id;
     const agentIndex = agentes.findIndex(a => a.id === agenteId);
     
-    if(!agentIndex){
+    if(agentIndex === -1){
        return res.status(400).send("Agente nao encontrado");
     }
-  agentesRepository.deleteAgente()
+  agentesRepository.deleteAgente(agentIndex);
   res.status(200).send();
 }
 

@@ -1,9 +1,12 @@
 const casosController = require('../controllers/casosController')
 const express = require('express');
+const router = express.Router()
 
-// app.get('/casos', (req,res));
-// app.get('/casos/:id', (req,res));
-// app.post('/casos', (req,res));
-// app.put('/casos/:id', (req,res));
-// app.patch('/casos/:id', (req,res));
-// app.delete('/casos/:id', (req,res));
+router.get('/casos', casosController.getCasos);
+router.get('/casos/:id', casosController.getCaso);
+router.post('/casos', casosController.createCaso);
+// router.put('/casos/:id', (req,res));
+// router.patch('/casos/:id', (req,res));
+router.delete('/casos/:id', casosController.deleteCaso);
+
+module.exports = router
