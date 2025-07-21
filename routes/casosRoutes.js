@@ -1,4 +1,4 @@
-const casosController = require('../controllers/casosController')
+const casosController = require('../controllers/casosController.js')
 const express = require('express');
 const router = express.Router()
 
