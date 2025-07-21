@@ -50,7 +50,7 @@ function deleteCaso(req,res){
        return res.status(404).send("Caso nao encontrado");
     }
   casosRepository.deleteCaso(casoIndex);
-  res.status(200).send();
+  res.status(204).send();
 }
 function updateCaso(req, res) {
   const casoId = req.params.id;
@@ -92,8 +92,13 @@ function patchCaso(req, res) {
   if (descricao !== undefined) {
     caso.descricao = descricao;
   }
-
-  caso.status = status;
+  if (status !== undefined) {
+    if( status != "aberto" && status != "solucionado")
+    {
+     return  res.status(401).send("Status nao permitido ")
+    }
+    caso.status = status
+  }
   
   if (agente_id !== undefined) {
     const agente = agentesRepository.findById(agente_id);

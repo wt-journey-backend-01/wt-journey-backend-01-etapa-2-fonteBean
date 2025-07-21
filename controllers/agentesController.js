@@ -55,7 +55,7 @@ function updateAgente(req, res) {
   res.status(200).json(agente);
 }
 
-function patchagente(req, res) {
+function patchAgente(req, res) {
   const agenteId = req.params.id;
   const { nome, cargo, dataDeIncorporacao} = req.body;
 
@@ -71,9 +71,17 @@ function patchagente(req, res) {
     agente.cargo = cargo;
   }
 
-  if(dataDeIncorporacao !== undefined && dataDeIncorporacao < new Date()){
-    agente.dataDeIncorporacao =dataDeIncorporacao
+if (dataDeIncorporacao !== undefined) {
+  const data = new Date(dataDeIncorporacao);
+  const agora = new Date();
+  if (isNaN(data.getTime())) {
+    return res.status(400).send("Data de incorporação inválida.");
   }
+  if (data > agora) {
+    return res.status(400).send("Data de incorporação não pode ser no futuro.");
+  }
+  agente.dataDeIncorporacao = data;
+}
   res.status(200).json(agente);
 }
 
@@ -86,7 +94,7 @@ function deleteAgente(req,res){
        return res.status(404).send("Agente nao encontrado");
     }
   agentesRepository.deleteAgente(agentIndex);
-  res.status(200).send();
+  res.status(204).send();
 }
 
 module.exports = {
@@ -95,5 +103,5 @@ module.exports = {
   createAgente,
   deleteAgente,
   updateAgente,
-  patchCaso
+  patchAgente,
 };
