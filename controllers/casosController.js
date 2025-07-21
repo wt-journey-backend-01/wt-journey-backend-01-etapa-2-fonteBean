@@ -56,7 +56,7 @@ function updateCaso(req, res) {
   const casoId = req.params.id;
   const { titulo, descricao, status, agente_id } = req.body;
 
-  if (!titulo || !descricao || !status || agente_id) {
+  if (!titulo || !descricao || !status || !agente_id) {
     return res.status(400).send("Todos os campos são obrigatórios para atualização completa.");
   }
 
@@ -64,6 +64,13 @@ function updateCaso(req, res) {
   if (!caso) {
     return res.status(404).send("caso não encontrado.");
   }
+ 
+    if( status != "aberto" && status != "solucionado")
+    {
+     return  res.status(400).send("Status nao permitido ")
+    }
+    caso.status = status
+  
   const agente = agentesRepository.findById(agente_id);
   if (!agente) {
     return res.status(404).send("Agente não encontrado para o agente_id fornecido");
@@ -95,7 +102,7 @@ function patchCaso(req, res) {
   if (status !== undefined) {
     if( status != "aberto" && status != "solucionado")
     {
-     return  res.status(401).send("Status nao permitido ")
+     return  res.status(400).send("Status nao permitido ")
     }
     caso.status = status
   }
