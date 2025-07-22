@@ -15,7 +15,7 @@ function getAgentes(req, res) {
         agentes = agentes.filter(a => a.cargo === cargo);
 
         if (agentes.length === 0) {
-            return errorResponse(404,`Agentes com cargo "${cargo}" não encontrados.`) ;
+            return errorResponse(res,404,`Agentes com cargo "${cargo}" não encontrados.`) ;
         }
     }
 
@@ -40,7 +40,7 @@ function getAgenteById(req,res){
   const agenteId = req.params.id;
   const agente = agentesRepository.findById(agenteId);
   if(!agente){
-       return errorResponse(404,"Agente nao encontrado");
+       return errorResponse(res,404,"Agente nao encontrado");
     }
      res.status(200).json(agente);
 }
@@ -52,18 +52,18 @@ function createAgente(req, res) {
   const { nome, cargo, dataDeIncorporacao } = req.body;
 
   if (!nome || !cargo || !dataDeIncorporacao) {
-    return errorResponse(400,"Nome, Cargo e dataDeIncorporacao são obrigatórios.");
+    return errorResponse(res,400,"Nome, Cargo e dataDeIncorporacao são obrigatórios.");
   }
 
   const data = new Date(dataDeIncorporacao);
   const agora = new Date();
 
   if (isNaN(data.getTime())) {
-    return errorResponse(400,"Data de incorporação inválida.");
+    return errorResponse(res,400,"Data de incorporação inválida.");
   }
 
   if (data > agora) {
-    return errorResponse(400,"Data de incorporação não pode ser no futuro.");
+    return errorResponse(res,400,"Data de incorporação não pode ser no futuro.");
   }
 
   const novoAgente = {
@@ -82,22 +82,22 @@ function updateAgente(req, res) {
   const { nome, cargo, dataDeIncorporacao } = req.body;
 
   if ('id' in req.body) {
-    return errorResponse(400,"Não é permitido alterar o ID do agente.");
+    return errorResponse(res,400,"Não é permitido alterar o ID do agente.");
   }
 
   if (!nome || !cargo || !dataDeIncorporacao) {
-    return errorResponse(400,"Todos os campos são obrigatórios para atualização completa.");
+    return errorResponse(res,400,"Todos os campos são obrigatórios para atualização completa.");
   }
 
   const data = new Date(dataDeIncorporacao);
   const agora = new Date();
 
   if (isNaN(data.getTime())) {
-    return errorResponse(400,"Data de incorporação inválida.");
+    return errorResponse(res,400,"Data de incorporação inválida.");
   }
 
   if (data > agora) {
-    return errorResponse(400,"Data de incorporação não pode ser no futuro.");
+    return errorResponse(res,400,"Data de incorporação não pode ser no futuro.");
   }
 
   const agenteAtualizado = agentesRepository.updateAgente(agenteId, {
@@ -107,7 +107,7 @@ function updateAgente(req, res) {
   });
 
   if (!agenteAtualizado) {
-    return errorResponse(404,"Agente não encontrado.");
+    return errorResponse(res,404,"Agente não encontrado.");
   }
 
   res.status(200).json(agenteAtualizado);
@@ -119,15 +119,15 @@ function patchAgente(req, res) {
   const { nome, cargo, dataDeIncorporacao } = req.body;
 
   if ('id' in req.body) {
-    return errorResponse(400,"Não é permitido alterar o ID do agente.");
+    return errorResponse(res,400,"Não é permitido alterar o ID do agente.");
   }
   if (nome === undefined && cargo === undefined && dataDeIncorporacao === undefined) {
-    return errorResponse(400,"Nenhum campo válido para atualização foi enviado.");
+    return errorResponse(res,400,"Nenhum campo válido para atualização foi enviado.");
   }
 
   const agente = agentesRepository.findById(agenteId);
   if (!agente) {
-    return errorResponse(404,"Agente não encontrado.");
+    return errorResponse(res,404,"Agente não encontrado.");
   }
 
   if (nome !== undefined) { 
@@ -140,10 +140,10 @@ function patchAgente(req, res) {
     const data = new Date(dataDeIncorporacao);
     const agora = new Date();
     if (isNaN(data.getTime())) {
-      return errorResponse(400,"Data de incorporação inválida.");
+      return errorResponse(res,400,"Data de incorporação inválida.");
     }
     if (data > agora) {
-      return errorResponse(400,"Data de incorporação não pode ser no futuro.");
+      return errorResponse(res,400,"Data de incorporação não pode ser no futuro.");
     }
     agente.dataDeIncorporacao = data.toISOString().split('T')[0];
   }
@@ -157,7 +157,7 @@ function deleteAgente(req,res){
     
   const sucesso = agentesRepository.deleteAgente(agenteId);
   if(!sucesso){
-    return errorResponse(404,`Error ao deletar ${agenteId}`)
+    return errorResponse(res,404,`Error ao deletar ${agenteId}`)
   }
   res.status(204).send();
 }
