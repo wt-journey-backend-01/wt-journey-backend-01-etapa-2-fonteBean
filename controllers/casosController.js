@@ -87,7 +87,10 @@ function deleteCaso(req,res){
     if(casoIndex === -1){
        return res.status(404).send("Caso nao encontrado");
     }
-  casosRepository.deleteCaso(casoIndex);
+   const sucesso = casosRepository.deleteCaso(casoIndex);
+   if(!sucesso){
+    return res.status(400).send(`Erro ao deletar caso ${casoId}`)
+   }
   res.status(204).send();
 }
 function updateCaso(req, res) {

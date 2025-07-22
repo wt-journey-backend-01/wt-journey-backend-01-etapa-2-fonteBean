@@ -141,7 +141,10 @@ function deleteAgente(req,res){
     if(agentIndex === -1){
        return res.status(404).send("Agente nao encontrado");
     }
-  agentesRepository.deleteAgente(agentIndex);
+  const sucesso = agentesRepository.deleteAgente(agentIndex);
+  if(!sucesso){
+    return res.status(400).send(`Error ao deletar ${agenteId}`)
+  }
   res.status(204).send();
 }
 
