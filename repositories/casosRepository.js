@@ -21,8 +21,13 @@ function criarCaso(caso){
   casos.push(caso);
 }
 
-function deleteCaso(index){
-  casos.splice(index, 1)
+function deleteCaso(id){
+   const index = casos.findIndex(c => c.id === id );
+  if (index !== -1) {
+    casos.splice(index, 1);
+    return true;
+  }
+  return false;
 }
 
 

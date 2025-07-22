@@ -134,14 +134,9 @@ function patchAgente(req, res) {
 
 
 function deleteAgente(req,res){
-    const agentes = agentesRepository.findAll();
-    const agenteId =req.params.id;
-    const agentIndex = agentes.findIndex(a => a.id === agenteId);
+  const agenteId =req.params.id;
     
-    if(agentIndex === -1){
-       return res.status(404).send("Agente nao encontrado");
-    }
-  const sucesso = agentesRepository.deleteAgente(agentIndex);
+  const sucesso = agentesRepository.deleteAgente(agenteId);
   if(!sucesso){
     return res.status(400).send(`Error ao deletar ${agenteId}`)
   }

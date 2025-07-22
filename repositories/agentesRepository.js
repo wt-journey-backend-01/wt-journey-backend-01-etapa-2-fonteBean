@@ -29,16 +29,16 @@ function updateAgente(id, dadosAtualizados) {
   return null;
 }
 
-function deleteAgente(index){
-  function deleteAgenteById(id) {
-  const index = agentes.findIndex(a => a.id === id);
+function deleteAgente(id)
+{
+  const index = agentes.findIndex(a => a.id === id );
   if (index !== -1) {
     agentes.splice(index, 1);
     return true;
   }
   return false;
 }
-}
+
 
 
 

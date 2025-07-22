@@ -80,14 +80,8 @@ function createCaso(req,res){
 }
 
 function deleteCaso(req,res){
-    const casos = casosRepository.findAll();
     const casoId = req.params.id;
-    const casoIndex = casos.findIndex(c => c.id === casoId);
-    
-    if(casoIndex === -1){
-       return res.status(404).send("Caso nao encontrado");
-    }
-   const sucesso = casosRepository.deleteCaso(casoIndex);
+   const sucesso = casosRepository.deleteCaso(casoId);
    if(!sucesso){
     return res.status(400).send(`Erro ao deletar caso ${casoId}`)
    }
