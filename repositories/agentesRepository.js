@@ -30,7 +30,14 @@ function updateAgente(id, dadosAtualizados) {
 }
 
 function deleteAgente(index){
-  agentes.splice(index, 1)
+  function deleteAgenteById(id) {
+  const index = agentes.findIndex(a => a.id === id);
+  if (index !== -1) {
+    agentes.splice(index, 1);
+    return true;
+  }
+  return false;
+}
 }
 
 

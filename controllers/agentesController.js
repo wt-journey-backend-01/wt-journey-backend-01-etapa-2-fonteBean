@@ -1,7 +1,7 @@
 const agentesRepository = require('../repositories/agentesRepository')
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
-const { patchCaso } = require('./casosController');
+
 
 
 function getAgentes(req,res){
@@ -51,7 +51,7 @@ function createAgente(req, res) {
     id: uuidv4(),
     nome,
     cargo,
-    dataDeIncorporacao: data,
+    dataDeIncorporacao: data.toISOString().split('T')[0],
   };
 
   agentesRepository.criarAgente(novoAgente);
@@ -84,7 +84,7 @@ function updateAgente(req, res) {
   const agenteAtualizado = agentesRepository.updateAgente(agenteId, {
     nome,
     cargo,
-    dataDeIncorporacao: data,
+    dataDeIncorporacao: data.toISOString().split('T')[0],
   });
 
   if (!agenteAtualizado) {
@@ -126,7 +126,7 @@ function patchAgente(req, res) {
     if (data > agora) {
       return res.status(400).send("Data de incorporação não pode ser no futuro.");
     }
-    agente.dataDeIncorporacao = data;
+    agente.dataDeIncorporacao = data.toISOString().split('T')[0];
   }
 
   res.status(200).json(agente);
