@@ -1,184 +1,57 @@
-<sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
+<sup>Suas cotas de feedback AI acabaram, o sistema de feedback voltou ao padrão.</sup>
 
-Você tem 0 créditos restantes para usar o sistema de feedback AI.
+# 🧪 Relatório de Avaliação – Journey Levty Etapa 1 - fonteBean
 
-# Feedback para fonteBean:
+**Data:** 22/07/2025 22:43
 
-Nota final: **91.5/100**
-
-Olá, fonteBean! 👋✨
-
-Primeiramente, parabéns pelo empenho e pelo excelente trabalho! 🎉 Você entregou uma API RESTful muito bem estruturada, com a arquitetura modular que o desafio pedia, usando rotas, controladores e repositories, e ainda implementou todos os métodos HTTP para os recursos `/agentes` e `/casos`. Isso já mostra seu domínio em Node.js e Express.js! 👏👏
-
-Além disso, você conseguiu implementar filtros importantes, como o filtro por status e por agente nos casos, que são bônus valiosos e mostram seu cuidado com a usabilidade da API. Legal também como você fez a validação dos dados de entrada e o tratamento dos erros, garantindo respostas claras para o cliente da API. Isso é fundamental para APIs profissionais!
+**Nota Final:** `49.41/100`
+**Status:** ❌ Reprovado
 
 ---
+## ✅ Requisitos Obrigatórios
+- Foram encontrados `14` problemas nos requisitos obrigatórios. Veja abaixo os testes que falharam:
+  - ⚠️ **Falhou no teste**: `CREATE: Recebe status code 400 ao tentar criar agente com payload em formato incorreto`
+    - **Melhoria sugerida**: Seu endpoint de criação de agentes (`POST /agentes`) não está validando payloads incorretos. O teste enviou dados inválidos e esperava um status `400 Bad Request`, mas recebeu outro. Implemente uma validação robusta para os dados de entrada.
+  - ⚠️ **Falhou no teste**: `READ: Recebe status 404 ao tentar buscar um agente inexistente`
+    - **Melhoria sugerida**: Ao tentar buscar um agente com ID inexistente (`GET /agentes/:id`), o teste não recebeu `404 Not Found`. Sua rota deve ser capaz de identificar que o recurso não existe e retornar o status apropriado.
+  - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 400 ao tentar atualizar agente por completo com método PUT e payload em formato incorreto`
+    - **Melhoria sugerida**: Sua rota de atualização completa de agentes (`PUT /agentes/:id`) não está retornando `400 Bad Request` para payloads inválidos. Garanta que a validação de dados ocorra antes da tentativa de atualização.
+  - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 404 ao tentar atualizar agente por completo com método PUT de agente inexistente`
+    - **Melhoria sugerida**: Ao tentar atualizar um agente inexistente com `PUT /agentes/:id`, o teste não recebeu `404 Not Found`. A rota deve indicar que o recurso não foi encontrado.
+  - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 400 ao tentar atualizar agente parcialmente com método PATCH e payload em formato incorreto`
+    - **Melhoria sugerida**: Nenhuma sugestão de melhoria disponível.
+  - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 404 ao tentar atualizar agente por parcialmente com método PATCH de agente inexistente`
+    - **Melhoria sugerida**: Ao tentar atualizar um agente inexistente com `PATCH /agentes/:id`, o teste não recebeu `404 Not Found`. Certifique-se de que sua rota verifica a existência do recurso antes de tentar a atualização.
+  - ⚠️ **Falhou no teste**: `DELETE: Recebe status code 404 ao tentar deletar agente inexistente`
+    - **Melhoria sugerida**: Ao tentar deletar um agente com ID inexistente (`DELETE /agentes/:id`), o teste não recebeu `404 Not Found`. Sua rota deve sinalizar quando o recurso a ser deletado não é encontrado.
+  - ⚠️ **Falhou no teste**: `CREATE: Recebe status code 400 ao tentar criar caso com payload em formato incorreto`
+    - **Melhoria sugerida**: Seu endpoint de criação de casos (`POST /casos`) não está validando payloads incorretos. O teste enviou dados inválidos e esperava um status `400 Bad Request`, mas recebeu outro. Implemente uma validação robusta para os dados de entrada.
+  - ⚠️ **Falhou no teste**: `CREATE: Recebe status code 404 ao tentar criar caso com id de agente inválido/inexistente`
+    - **Melhoria sugerida**: Ao tentar criar um caso com um `agente_id` inexistente, o teste não recebeu `404 Not Found`. Sua API deve ser capaz de identificar que o agente referenciado não existe e retornar o status apropriado.
+  - ⚠️ **Falhou no teste**: `READ: Recebe status code 404 ao tentar buscar um caso por ID inválido`
+    - **Melhoria sugerida**: Ao tentar buscar um caso com ID inexistente (`GET /casos/:id`), o teste não recebeu `404 Not Found`. Sua rota deve ser capaz de identificar que o recurso não existe e retornar o status apropriado.
+  - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 400 ao tentar atualizar um caso por completo com método PUT com payload em formato incorreto`
+    - **Melhoria sugerida**: Sua rota de atualização completa de casos (`PUT /casos/:id`) não está retornando `400 Bad Request` para payloads inválidos. Garanta que a validação de dados ocorra antes da tentativa de atualização.
+  - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 404 ao tentar atualizar um caso por completo com método PUT de um caso inexistente`
+    - **Melhoria sugerida**: Ao tentar atualizar um caso inexistente com `PUT /casos/:id`, o teste não recebeu `404 Not Found`. A rota deve indicar que o recurso não foi encontrado.
+  - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 404 ao tentar atualizar um caso parcialmente com método PATCH de um caso inexistente`
+    - **Melhoria sugerida**: Ao tentar atualizar um caso inexistente com `PATCH /casos/:id`, o teste não recebeu `404 Not Found`. Certifique-se de que sua rota verifica a existência do recurso antes de tentar a atualização.
+  - ⚠️ **Falhou no teste**: `DELETE: Recebe status code 404 ao tentar deletar um caso inexistente`
+    - **Melhoria sugerida**: Ao tentar deletar um caso com ID inexistente (`DELETE /casos/:id`), o teste não recebeu `404 Not Found`. Sua rota deve sinalizar quando o recurso a ser deletado não é encontrado.
 
-### Vamos analisar juntos alguns pontos que podem ser melhorados para deixar sua API ainda mais robusta e alinhada com o esperado? 🕵️‍♂️🔍
+## ⭐ Itens de Destaque (recupera até 40 pontos)
+- Você conquistou `2` bônus! Excelente trabalho nos detalhes adicionais!
+  - 🌟 **Testes bônus passados**: `Simple Filtering: Estudante implementou endpoint de filtragem de caso por status corretamente`
+    - Parabéns! Você implementou a filtragem de casos por status (`GET /casos?status=...`) corretamente. Isso adiciona uma funcionalidade poderosa à sua API para gerenciar casos.
+  - 🌟 **Testes bônus passados**: `Simple Filtering: Estudante implementou endpoint de filtragem de caso por agente corretamente`
+    - Ótimo! A filtragem de casos por `agente_id` (`GET /casos?agente_id=...`) está funcionando corretamente. Isso permite listar casos específicos de cada agente.
 
----
-
-## 1. Sobre os status HTTP para deletar agentes e casos inexistentes
-
-Eu vi no seu código, especificamente nas funções `deleteAgente` e `deleteCaso` dentro dos controllers, que você está retornando o status **400 (Bad Request)** quando tenta deletar um recurso que não existe:
-
-```js
-function deleteAgente(req,res){
-  const agenteId =req.params.id;
-  const sucesso = agentesRepository.deleteAgente(agenteId);
-  if(!sucesso){
-    return res.status(400).send(`Error ao deletar ${agenteId}`)
-  }
-  res.status(204).send();
-}
-```
-
-e
-
-```js
-function deleteCaso(req,res){
-  const casoId = req.params.id;
-  const sucesso = casosRepository.deleteCaso(casoId);
-  if(!sucesso){
-    return res.status(400).send(`Erro ao deletar caso ${casoId}`)
-  }
-  res.status(204).send();
-}
-```
-
-**Por que isso é importante?**  
-O código 400 indica que a requisição está mal formada, ou seja, o cliente enviou algo errado no pedido. Já o código **404 (Not Found)** é o mais apropriado para indicar que o recurso que se quer deletar não existe no servidor. Isso ajuda o cliente da API a entender que o pedido está correto, mas o recurso não foi encontrado.
-
-**Como corrigir?**  
-Basta trocar o `res.status(400)` para `res.status(404)` nesses pontos, assim:
-
-```js
-if(!sucesso){
-  return res.status(404).send(`Agente com id ${agenteId} não encontrado para exclusão.`);
-}
-```
-
-e
-
-```js
-if(!sucesso){
-  return res.status(404).send(`Caso com id ${casoId} não encontrado para exclusão.`);
-}
-```
-
-Essa mudança deixa a API mais semântica e alinhada com as boas práticas REST. 😉
-
-**Recomendo fortemente que você revise o conceito dos status HTTP 400 e 404 para entender melhor essa distinção:**  
-- https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400  
-- https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/404  
-- E para um entendimento mais geral sobre status HTTP e Express, dê uma olhada nesse vídeo super didático: https://youtu.be/RSZHvQomeKE
+## ❌ Problemas Detectados (Descontos de até 100 pontos)
+- Nenhuma infração grave foi detectada. Muito bom nesse aspecto!
 
 ---
-
-## 2. Sobre os testes bônus que não passaram: mensagens de erro customizadas e filtros avançados
-
-Percebi que alguns testes bônus relacionados a mensagens de erro personalizadas para argumentos inválidos e filtros mais complexos (como busca por palavra-chave em casos e ordenação por data de incorporação em agentes) não passaram.
-
-Ao analisar seu código, você implementou a busca por palavra-chave em casos no método `searchEmCaso` do `casosController.js` e a ordenação por data de incorporação em `getAgentes` do `agentesController.js`. Porém, notei que a ordenação funciona, mas a busca por palavra-chave no endpoint `/casos/search` está presente, mas talvez a rota não esteja sendo exportada corretamente, ou o middleware de rota não esteja configurado para tratar essa query como esperado.
-
-Além disso, as mensagens de erro customizadas, embora existam, podem ser aprimoradas para serem mais descritivas e padronizadas.
-
-**Sugestão para melhorar as mensagens de erro:**  
-Crie um middleware ou uma função utilitária para padronizar o formato das respostas de erro, por exemplo:
-
-```js
-function errorResponse(res, statusCode, message) {
-  return res.status(statusCode).json({ error: message });
-}
-```
-
-E utilize assim:
-
-```js
-if (!agente) {
-  return errorResponse(res, 404, "Agente não encontrado para o agente_id fornecido.");
-}
-```
-
-Isso facilita a manutenção e deixa a API mais profissional e consistente.
-
----
-
-## 3. Organização e estrutura do projeto
-
-Sua estrutura de pastas está exatamente como o esperado! 🎯 Isso é ótimo, pois facilita a leitura e manutenção do código:
-
-```
-.
-├── controllers
-│   ├── agentesController.js
-│   └── casosController.js
-├── repositories
-│   ├── agentesRepository.js
-│   └── casosRepository.js
-├── routes
-│   ├── agentesRoutes.js
-│   └── casosRoutes.js
-├── server.js
-├── package.json
-└── utils
-    └── errorHandler.js
-```
-
-Parabéns por seguir essa arquitetura modular! Isso é fundamental para projetos reais e escaláveis. 👏
-
----
-
-## 4. Pequenos detalhes que podem fazer a diferença
-
-- Na função `createCaso` do `casosController.js`, você retorna status 401 quando o status do caso não é permitido:
-
-```js
-if( status != "aberto" && status != "solucionado") {
-  return res.status(401).send("Status nao permitido ")
-}
-```
-
-O código **401 Unauthorized** é usado para autenticação. O mais correto aqui é usar **400 Bad Request**, pois o problema é um valor inválido no corpo da requisição, não uma questão de autenticação.
-
-Então, troque para:
-
-```js
-return res.status(400).send("Status não permitido");
-```
-
-- Em `patchAgente` e `patchCaso`, você atualiza o objeto diretamente no array, o que é ótimo, mas lembre-se de que, se o dado for complexo, pode ser interessante usar o método do repository para manter a lógica centralizada.
-
----
-
-## Recursos para você continuar brilhando ✨
-
-- Para aprimorar a manipulação das respostas HTTP e status codes: https://youtu.be/RSZHvQomeKE  
-- Para entender melhor validação e tratamento de erros em APIs: https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_  
-- Para trabalhar melhor com arrays e filtros em JavaScript: https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI  
-- Para entender a arquitetura MVC aplicada ao Node.js, que você já está usando muito bem: https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH
-
----
-
-## 📋 Resumo rápido para você focar:
-
-- 🔄 Ajustar os status HTTP retornados no DELETE para **404** quando o recurso não existir, ao invés de 400.  
-- 🛠️ Padronizar e aprimorar as mensagens de erro para deixá-las mais claras e consistentes.  
-- 🚦 Corrigir o status HTTP para validação inválida de dados (ex: status inválido no caso) para usar 400 e não 401.  
-- 🔍 Revisar e garantir que os filtros e buscas avançadas estejam funcionando e expostos corretamente nas rotas.  
-- 💡 Continue explorando boas práticas de API REST e tratamento de erros para deixar sua aplicação ainda mais profissional!
-
----
-
-FonteBean, você está no caminho certo e já tem uma base sólida para construir APIs robustas e bem organizadas! Continue praticando e aprimorando esses detalhes que farão toda a diferença no seu crescimento como desenvolvedor. 🚀✨
-
-Se precisar de ajuda para entender algum conceito ou implementar alguma melhoria, estou aqui para te ajudar! Vamos juntos nessa jornada! 💪😄
-
-Um abraço do seu Code Buddy! 🤖❤️
-
-> Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
-
-
+Continue praticando e caprichando no código. Cada detalhe conta! 💪
+Se precisar de ajuda, não hesite em perguntar nos canais da guilda. Estamos aqui para ajudar! 🤝
 
 ---
 <sup>Made By the Autograder Team.</sup><br>&nbsp;&nbsp;&nbsp;&nbsp;<sup><sup>- [Arthur Carvalho](https://github.com/ArthurCRodrigues)</sup></sup><br>&nbsp;&nbsp;&nbsp;&nbsp;<sup><sup>- [Arthur Drumond](https://github.com/drumondpucminas)</sup></sup><br>&nbsp;&nbsp;&nbsp;&nbsp;<sup><sup>- [Gabriel Resende](https://github.com/gnvr29)</sup></sup>
