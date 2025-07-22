@@ -4,17 +4,35 @@ const { v4: uuidv4 } = require('uuid');
 
 
 
-function getAgentes(req,res){
-  const agentes = agentesRepository.findAll();
-  const cargo = req.query.cargo
-  if(cargo){
-    const agentesComCargo = agentes.filter(a=> a.cargo == cargo)
-    if(agentesComCargo.length === 0){
-      return res.status(404).send(`Agentes com cargo ${cargo} nao encontrados`)
+function getAgentes(req, res) {
+    let agentes = agentesRepository.findAll();
+
+    const cargo = req.query.cargo;
+    const sort = req.query.sort;
+
+    if (cargo) {
+        agentes = agentes.filter(a => a.cargo === cargo);
+
+        if (agentes.length === 0) {
+            return res.status(404).send(`Agentes com cargo "${cargo}" não encontrados.`);
+        }
     }
-    res.status(200).json(agentesComCargo)
-  }
-  res.status(200).json(agentes);
+
+    if (sort === 'dataDeIncorporacao') {
+        agentes.sort((a, b) => {
+            if (a.dataDeIncorporacao < b.dataDeIncorporacao) return -1;
+            if (a.dataDeIncorporacao > b.dataDeIncorporacao) return 1;
+            return 0;
+        });
+    } else if (sort === '-dataDeIncorporacao') {
+        agentes.sort((a, b) => {
+            if (a.dataDeIncorporacao > b.dataDeIncorporacao) return -1;
+            if (a.dataDeIncorporacao < b.dataDeIncorporacao) return 1;
+            return 0;
+        });
+    }
+
+    res.status(200).json(agentes);
 }
 
 function getAgenteById(req,res){

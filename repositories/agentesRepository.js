@@ -5,7 +5,19 @@ const agentes = [
   "dataDeIncorporacao": "1992/10/04",
   "cargo": "delegado"
 
-}
+},
+  {
+    "id": "a2b3c4d5-e6f7-8901-2345-67890abcdef0",
+    "nome": "Mariana Santos",
+    "dataDeIncorporacao": "2015/07/20",
+    "cargo": "investigador"
+  },
+  {
+    "id": "b3c4d5e6-f7a8-9012-3456-7890abcdef12",
+    "nome": "Pedro Almeida",
+    "dataDeIncorporacao": "2008/03/10",
+    "cargo": "escrivão"
+  }
 ];
 
 function findAll(){
