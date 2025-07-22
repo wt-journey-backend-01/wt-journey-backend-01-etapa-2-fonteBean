@@ -8,8 +8,8 @@ function getAgentes(req,res){
   const agentes = agentesRepository.findAll();
   const cargo = req.query.cargo
   if(cargo){
-    const agentesComCargo = agentes.find(a=> a.cargo == cargo)
-    if(!agentesComCargo){
+    const agentesComCargo = agentes.filter(a=> a.cargo == cargo)
+    if(agentesComCargo.length === 0){
       return res.status(404).send(`Agentes com cargo ${cargo} nao encontrados`)
     }
     res.status(200).json(agentesComCargo)
@@ -94,7 +94,7 @@ function updateAgente(req, res) {
   res.status(200).json(agenteAtualizado);
 }
 
-function patchAgente(req, res) {
+
 function patchAgente(req, res) {
   const agenteId = req.params.id;
   const { nome, cargo, dataDeIncorporacao } = req.body;
@@ -105,10 +105,10 @@ function patchAgente(req, res) {
   if (nome === undefined && cargo === undefined && dataDeIncorporacao === undefined) {
     return res.status(400).send("Nenhum campo válido para atualização foi enviado.");
   }
-}
+
   const agente = agentesRepository.findById(agenteId);
   if (!agente) {
-    return res.status(404).send("agente não encontrado.");
+    return res.status(404).send("Agente não encontrado.");
   }
 
   if (nome !== undefined) { 
@@ -117,20 +117,21 @@ function patchAgente(req, res) {
   if (cargo !== undefined) {
     agente.cargo = cargo;
   }
+  if (dataDeIncorporacao !== undefined) {
+    const data = new Date(dataDeIncorporacao);
+    const agora = new Date();
+    if (isNaN(data.getTime())) {
+      return res.status(400).send("Data de incorporação inválida.");
+    }
+    if (data > agora) {
+      return res.status(400).send("Data de incorporação não pode ser no futuro.");
+    }
+    agente.dataDeIncorporacao = data;
+  }
 
-if (dataDeIncorporacao !== undefined) {
-  const data = new Date(dataDeIncorporacao);
-  const agora = new Date();
-  if (isNaN(data.getTime())) {
-    return res.status(400).send("Data de incorporação inválida.");
-  }
-  if (data > agora) {
-    return res.status(400).send("Data de incorporação não pode ser no futuro.");
-  }
-  agente.dataDeIncorporacao = data;
-}
   res.status(200).json(agente);
 }
+
 
 function deleteAgente(req,res){
     const agentes = agentesRepository.findAll();

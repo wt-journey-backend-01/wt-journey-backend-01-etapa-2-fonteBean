@@ -39,5 +39,6 @@ module.exports  = {
   findAll,
   findById,
   criarAgente,
+  updateAgente,
   deleteAgente
 }

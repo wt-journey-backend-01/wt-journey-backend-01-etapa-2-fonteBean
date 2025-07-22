@@ -11,18 +11,18 @@ function getCasos(req,res){
   if(status){
     if( status != "aberto" && status != "solucionado")
     {
-      return  res.status(401).send("Status nao permitido ")
+      return  res.status(400).send("Status nao permitido ")
     }
-    const casosStatus = casos.find(c=> c.status == status)
-    if(!casosStatus){
+    const casosStatus = casos.filter(c=> c.status == status)
+    if(casosStatus.length == 0){
      return res.status(404).send(`Casos com status ${status} nao encotrados`)
     }
     return res.status(200).json(casosStatus)
   }
 
   if(agente_id){
-    const casosAgente  = casos.find(c => c.agente_id === agente_id)
-    if(!casosAgente){
+    const casosAgente  = casos.filter(c => c.agente_id === agente_id)
+    if(casosAgente.length === 0){
       return res.status(404).send(`Casos do agente ${agente_id}, nao encontrados`)
     }
     return res.status(200).json(casosAgente)
@@ -57,7 +57,7 @@ function getAgentebyCaso(req,res){
 function createCaso(req,res){
   const {titulo ,descricao ,status, agente_id} = req.body;
   if(!titulo || !descricao ||  !status || !agente_id){
-    res.status(400).send("Titulo, descricao, status e agente obrigatorios")
+   return res.status(400).send("Titulo, descricao, status e agente obrigatorios")
   }
 
   if( status != "aberto" && status != "solucionado")
