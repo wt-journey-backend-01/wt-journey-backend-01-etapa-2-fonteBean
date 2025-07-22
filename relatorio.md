@@ -1,225 +1,180 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 1 créditos restantes para usar o sistema de feedback AI.
+Você tem 0 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para fonteBean:
 
-Nota final: **92.6/100**
+Nota final: **91.5/100**
 
-Olá, fonteBean! 🚓✨ Que jornada incrível você fez até aqui! Parabéns pelo empenho e pela nota 92.6 — isso mostra que você está no caminho certo, mandando muito bem na construção dessa API para o Departamento de Polícia! 🎉👏
+Olá, fonteBean! 👋✨
 
----
+Primeiramente, parabéns pelo empenho e pelo excelente trabalho! 🎉 Você entregou uma API RESTful muito bem estruturada, com a arquitetura modular que o desafio pedia, usando rotas, controladores e repositories, e ainda implementou todos os métodos HTTP para os recursos `/agentes` e `/casos`. Isso já mostra seu domínio em Node.js e Express.js! 👏👏
 
-## 🎯 Primeiramente, os pontos fortes que merecem um aplauso:
-
-- Você estruturou seu projeto de forma bastante organizada, com pastas separadas para **rotas**, **controladores** e **repositories** — isso é fundamental para manter o código limpo e fácil de manter.  
-- Os endpoints básicos para `/agentes` e `/casos` estão todos implementados, incluindo os métodos HTTP GET, POST, PUT, PATCH e DELETE.  
-- A validação dos dados está presente, e o tratamento de erros com status codes 400 e 404 está muito bem feito, o que é essencial para uma API robusta.  
-- Você também implementou os filtros básicos para os casos, como filtragem por status e por agente, que são funcionalidades bônus importantes.  
-- Os retornos de status HTTP (200, 201, 204) estão sendo usados corretamente na maioria dos lugares.
-
-Esses são pontos que mostram que você compreende muito bem os fundamentos do Express.js e a arquitetura RESTful! 👏🚀
+Além disso, você conseguiu implementar filtros importantes, como o filtro por status e por agente nos casos, que são bônus valiosos e mostram seu cuidado com a usabilidade da API. Legal também como você fez a validação dos dados de entrada e o tratamento dos erros, garantindo respostas claras para o cliente da API. Isso é fundamental para APIs profissionais!
 
 ---
 
-## 🔍 Agora, vamos analisar juntos os detalhes que podem ser aprimorados para você chegar ao 100% e além!
+### Vamos analisar juntos alguns pontos que podem ser melhorados para deixar sua API ainda mais robusta e alinhada com o esperado? 🕵️‍♂️🔍
 
-### 1. Problema com o endpoint de criação e atualização completa do agente (`POST /agentes` e `PUT /agentes/:id`)
+---
 
-Eu vi no seu código que o método `createAgente` no controller está assim:
+## 1. Sobre os status HTTP para deletar agentes e casos inexistentes
+
+Eu vi no seu código, especificamente nas funções `deleteAgente` e `deleteCaso` dentro dos controllers, que você está retornando o status **400 (Bad Request)** quando tenta deletar um recurso que não existe:
 
 ```js
-function createAgente(req, res) {
-  const { nome, cargo, dataDeIncorporacao } = req.body;
-
-  if (!nome || !cargo || !dataDeIncorporacao) {
-    return res.status(400).send("Nome, Cargo e dataDeIncorporacao são obrigatórios.");
+function deleteAgente(req,res){
+  const agenteId =req.params.id;
+  const sucesso = agentesRepository.deleteAgente(agenteId);
+  if(!sucesso){
+    return res.status(400).send(`Error ao deletar ${agenteId}`)
   }
+  res.status(204).send();
+}
+```
 
-  const data = new Date(dataDeIncorporacao);
-  const agora = new Date();
+e
 
-  if (isNaN(data.getTime())) {
-    return res.status(400).send("Data de incorporação inválida.");
+```js
+function deleteCaso(req,res){
+  const casoId = req.params.id;
+  const sucesso = casosRepository.deleteCaso(casoId);
+  if(!sucesso){
+    return res.status(400).send(`Erro ao deletar caso ${casoId}`)
   }
-
-  if (data > agora) {
-    return res.status(400).send("Data de incorporação não pode ser no futuro.");
-  }
-
-  const novoAgente = {
-    id: uuidv4(),
-    nome,
-    cargo,
-    dataDeIncorporacao: data,
-  };
-
-  agentesRepository.criarAgente(novoAgente);
-  res.status(201).json(novoAgente);
+  res.status(204).send();
 }
 ```
 
-💡 **Aqui tudo parece correto**, inclusive a validação da data e o retorno do status 201. Porém, o teste de criação falhou, o que pode indicar que o formato da data armazenada pode estar causando um problema sutil. No seu repositório, `dataDeIncorporacao` está armazenada como uma string, mas no controller você está armazenando como um objeto `Date`:
+**Por que isso é importante?**  
+O código 400 indica que a requisição está mal formada, ou seja, o cliente enviou algo errado no pedido. Já o código **404 (Not Found)** é o mais apropriado para indicar que o recurso que se quer deletar não existe no servidor. Isso ajuda o cliente da API a entender que o pedido está correto, mas o recurso não foi encontrado.
+
+**Como corrigir?**  
+Basta trocar o `res.status(400)` para `res.status(404)` nesses pontos, assim:
 
 ```js
-dataDeIncorporacao: data,
-```
-
-Isso pode gerar inconsistência na comparação e no retorno do dado, pois o teste pode esperar uma string no formato original (ex: `"1992/10/04"`) e não um objeto Date. Recomendo que você armazene e retorne a data sempre como string no formato ISO ou no formato que você recebeu, para manter consistência.
-
-**Sugestão:** Converta a data para string antes de salvar e retornar, assim:
-
-```js
-const novoAgente = {
-  id: uuidv4(),
-  nome,
-  cargo,
-  dataDeIncorporacao: data.toISOString().split('T')[0], // Exemplo: '1992-10-04'
-};
-```
-
-E garanta que o repositório e as respostas usem esse formato para evitar confusão.
-
----
-
-Já no método `updateAgente` (PUT), você faz a validação dos campos e da data, mas o retorno do agente atualizado depende diretamente do método `updateAgente` do repositório. No seu `agentesRepository.js`, o método está assim:
-
-```js
-function updateAgente(id, dadosAtualizados) {
-  const index = agentes.findIndex(a => a.id === id);
-  if (index !== -1) {
-    agentes[index] = { ...agentes[index], ...dadosAtualizados };
-    return agentes[index];
-  }
-  return null;
+if(!sucesso){
+  return res.status(404).send(`Agente com id ${agenteId} não encontrado para exclusão.`);
 }
 ```
 
-Aqui está tudo certo, mas o problema pode ser o mesmo do formato da data: se você está atualizando `dataDeIncorporacao` com um objeto `Date`, e o array `agentes` espera uma string, isso pode gerar inconsistência e falha nos testes.
-
-**Portanto, ajuste o controller `updateAgente` para garantir que a data seja convertida em string antes de enviar para o repositório:**
+e
 
 ```js
-const agenteAtualizado = agentesRepository.updateAgente(agenteId, {
-  nome,
-  cargo,
-  dataDeIncorporacao: data.toISOString().split('T')[0],
-});
-```
-
----
-
-### 2. Manipulação de datas e consistência entre controller e repository
-
-Percebi que no seu `agentesRepository` os agentes já armazenados têm `dataDeIncorporacao` como strings, por exemplo:
-
-```js
-{
-  "id": "401bccf5-cf9e-489d-8412-446cd169a0f1",
-  "nome": "Rommel Carneiro",
-  "dataDeIncorporacao": "1992/10/04",
-  "cargo": "delegado"
+if(!sucesso){
+  return res.status(404).send(`Caso com id ${casoId} não encontrado para exclusão.`);
 }
 ```
 
-Enquanto no controller você está usando objetos `Date`. Isso pode causar problemas na comparação e no filtro por data (que você ainda não implementou, mas é parte dos bônus).
+Essa mudança deixa a API mais semântica e alinhada com as boas práticas REST. 😉
 
-**Para manter tudo consistente, escolha sempre armazenar e retornar a data como string no formato ISO (ex: `"1992-10-04"`) ou outro padrão que você defina, e só converta para `Date` quando precisar fazer cálculos ou comparações.**
-
----
-
-### 3. Sobre os testes bônus que falharam
-
-Você já implementou com sucesso a filtragem simples de casos por status e por agente, o que é ótimo! 🎉
-
-Mas percebi que ainda faltam algumas implementações para os bônus, como:
-
-- Endpoint para buscar o agente responsável por um caso (apesar do método `getAgentebyCaso` existir no controller e na rota, talvez precise de ajustes para funcionar perfeitamente).
-- Filtragem de casos por palavras-chave no título e descrição.
-- Filtragem e ordenação de agentes por data de incorporação (ordenar crescente e decrescente).
-- Mensagens de erro customizadas para argumentos inválidos.
-
-Esses são desafios extras que vão te ajudar a aprofundar seu domínio em filtros avançados, manipulação de dados em arrays e tratamento de erros personalizados.
+**Recomendo fortemente que você revise o conceito dos status HTTP 400 e 404 para entender melhor essa distinção:**  
+- https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400  
+- https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/404  
+- E para um entendimento mais geral sobre status HTTP e Express, dê uma olhada nesse vídeo super didático: https://youtu.be/RSZHvQomeKE
 
 ---
 
-### 4. Pequena dica sobre o método `deleteAgente`
+## 2. Sobre os testes bônus que não passaram: mensagens de erro customizadas e filtros avançados
 
-No seu controller você faz:
+Percebi que alguns testes bônus relacionados a mensagens de erro personalizadas para argumentos inválidos e filtros mais complexos (como busca por palavra-chave em casos e ordenação por data de incorporação em agentes) não passaram.
 
-```js
-const agentes = agentesRepository.findAll();
-const agentIndex = agentes.findIndex(a => a.id === agenteId);
+Ao analisar seu código, você implementou a busca por palavra-chave em casos no método `searchEmCaso` do `casosController.js` e a ordenação por data de incorporação em `getAgentes` do `agentesController.js`. Porém, notei que a ordenação funciona, mas a busca por palavra-chave no endpoint `/casos/search` está presente, mas talvez a rota não esteja sendo exportada corretamente, ou o middleware de rota não esteja configurado para tratar essa query como esperado.
 
-if(agentIndex === -1){
-   return res.status(404).send("Agente nao encontrado");
-}
-agentesRepository.deleteAgente(agentIndex);
-res.status(204).send();
-```
+Além disso, as mensagens de erro customizadas, embora existam, podem ser aprimoradas para serem mais descritivas e padronizadas.
 
-Aqui você está buscando o índice do agente no array para deletar, o que funciona, mas uma abordagem mais comum e segura seria criar um método no repository para deletar pelo `id`, assim o controller não precisa conhecer a estrutura interna do array. Isso melhora o encapsulamento e facilita futuras mudanças.
-
-Exemplo no repository:
+**Sugestão para melhorar as mensagens de erro:**  
+Crie um middleware ou uma função utilitária para padronizar o formato das respostas de erro, por exemplo:
 
 ```js
-function deleteAgenteById(id) {
-  const index = agentes.findIndex(a => a.id === id);
-  if (index !== -1) {
-    agentes.splice(index, 1);
-    return true;
-  }
-  return false;
+function errorResponse(res, statusCode, message) {
+  return res.status(statusCode).json({ error: message });
 }
 ```
 
-E no controller:
+E utilize assim:
 
 ```js
-const sucesso = agentesRepository.deleteAgenteById(agenteId);
-if (!sucesso) {
-  return res.status(404).send("Agente nao encontrado");
+if (!agente) {
+  return errorResponse(res, 404, "Agente não encontrado para o agente_id fornecido.");
 }
-res.status(204).send();
 ```
 
----
-
-## 📚 Recursos que recomendo para você aprofundar e corrigir esses pontos:
-
-- Para entender melhor a manipulação de rotas e middlewares no Express.js, veja este vídeo:  
-  https://youtu.be/RSZHvQomeKE  
-- Para aprender a lidar com datas e formatos em JavaScript, confira:  
-  https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Date  
-- Para trabalhar com arrays e filtros avançados (essencial para os bônus):  
-  https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI  
-- Para implementar validação e tratamento de erros na API:  
-  https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_  
-- Para entender status HTTP e boas práticas de retorno:  
-  https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400  
-  https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/404  
+Isso facilita a manutenção e deixa a API mais profissional e consistente.
 
 ---
 
-## ✅ Resumo dos principais pontos para focar:
+## 3. Organização e estrutura do projeto
 
-- **Consistência no formato da data**: armazene e retorne `dataDeIncorporacao` como string no mesmo formato, evite misturar objetos `Date` com strings.  
-- **Ajustar o controller para converter datas antes de salvar no repositório** (tanto no POST quanto no PUT).  
-- **Melhorar encapsulamento no repositório**: crie métodos para deletar pelo ID, evitando manipulação direta de índices no controller.  
-- **Implementar os filtros e ordenações avançadas para agentes (bônus)** e mensagens de erro customizadas para enriquecer a API.  
-- **Revisar o endpoint que retorna o agente responsável pelo caso** para garantir que está funcionando conforme esperado.  
+Sua estrutura de pastas está exatamente como o esperado! 🎯 Isso é ótimo, pois facilita a leitura e manutenção do código:
+
+```
+.
+├── controllers
+│   ├── agentesController.js
+│   └── casosController.js
+├── repositories
+│   ├── agentesRepository.js
+│   └── casosRepository.js
+├── routes
+│   ├── agentesRoutes.js
+│   └── casosRoutes.js
+├── server.js
+├── package.json
+└── utils
+    └── errorHandler.js
+```
+
+Parabéns por seguir essa arquitetura modular! Isso é fundamental para projetos reais e escaláveis. 👏
 
 ---
 
-## 🌟 Finalizando
+## 4. Pequenos detalhes que podem fazer a diferença
 
-Você está muito próximo da perfeição! Esse cuidado com detalhes como formato de dados e encapsulamento é o que diferencia um código bom de um código excelente. Continue explorando os filtros avançados e o tratamento de erros personalizados, porque eles vão enriquecer muito sua API e seu aprendizado.
+- Na função `createCaso` do `casosController.js`, você retorna status 401 quando o status do caso não é permitido:
 
-Se precisar, volte aos vídeos recomendados para reforçar conceitos e não hesite em testar seu código passo a passo, validando cada parte.
+```js
+if( status != "aberto" && status != "solucionado") {
+  return res.status(401).send("Status nao permitido ")
+}
+```
 
-Você está fazendo um trabalho incrível, fonteBean! Continue assim que o sucesso vem com certeza! 🚀💙
+O código **401 Unauthorized** é usado para autenticação. O mais correto aqui é usar **400 Bad Request**, pois o problema é um valor inválido no corpo da requisição, não uma questão de autenticação.
 
-Um abraço do seu Code Buddy! 🤖✨
+Então, troque para:
+
+```js
+return res.status(400).send("Status não permitido");
+```
+
+- Em `patchAgente` e `patchCaso`, você atualiza o objeto diretamente no array, o que é ótimo, mas lembre-se de que, se o dado for complexo, pode ser interessante usar o método do repository para manter a lógica centralizada.
+
+---
+
+## Recursos para você continuar brilhando ✨
+
+- Para aprimorar a manipulação das respostas HTTP e status codes: https://youtu.be/RSZHvQomeKE  
+- Para entender melhor validação e tratamento de erros em APIs: https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_  
+- Para trabalhar melhor com arrays e filtros em JavaScript: https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI  
+- Para entender a arquitetura MVC aplicada ao Node.js, que você já está usando muito bem: https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH
+
+---
+
+## 📋 Resumo rápido para você focar:
+
+- 🔄 Ajustar os status HTTP retornados no DELETE para **404** quando o recurso não existir, ao invés de 400.  
+- 🛠️ Padronizar e aprimorar as mensagens de erro para deixá-las mais claras e consistentes.  
+- 🚦 Corrigir o status HTTP para validação inválida de dados (ex: status inválido no caso) para usar 400 e não 401.  
+- 🔍 Revisar e garantir que os filtros e buscas avançadas estejam funcionando e expostos corretamente nas rotas.  
+- 💡 Continue explorando boas práticas de API REST e tratamento de erros para deixar sua aplicação ainda mais profissional!
+
+---
+
+FonteBean, você está no caminho certo e já tem uma base sólida para construir APIs robustas e bem organizadas! Continue praticando e aprimorando esses detalhes que farão toda a diferença no seu crescimento como desenvolvedor. 🚀✨
+
+Se precisar de ajuda para entender algum conceito ou implementar alguma melhoria, estou aqui para te ajudar! Vamos juntos nessa jornada! 💪😄
+
+Um abraço do seu Code Buddy! 🤖❤️
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
