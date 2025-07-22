@@ -7,7 +7,6 @@ function getCasos(req,res){
   const casos = casosRepository.findAll();
   const agente_id = req.query.agente_id
   const status = req.query.status
-
   if(status){
     if( status != "aberto" && status != "solucionado")
     {
@@ -53,6 +52,18 @@ function getAgentebyCaso(req,res){
   res.status(200).json(agente)
 }
 
+function searchEmCaso(req,res){
+  const busca = req.query.q ? req.query.q.toLowerCase() : ""
+  if(!busca){
+    return res.status(404).send("Parametro de busca nao encontrado")
+  }
+ 
+  const casosFiltrados = casosRepository.buscaPalavraEmCaso(busca)
+  if(casosFiltrados.length === 0){
+   return res.status(404).send(`Casos com a palavra ${busca} nao encotrados`)
+  }
+  res.status(200).json(casosFiltrados);
+}
 
 function createCaso(req,res){
   const {titulo ,descricao ,status, agente_id} = req.body;
@@ -165,4 +176,5 @@ module.exports = {
   deleteCaso,
   updateCaso,
   patchCaso,
+  searchEmCaso,
 };

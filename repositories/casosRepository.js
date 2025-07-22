@@ -30,11 +30,21 @@ function deleteCaso(id){
   return false;
 }
 
+function buscaPalavraEmCaso(palavraChave){
+     const casosFiltrados = casos.filter(caso => {
+        const titulo = caso.titulo ? caso.titulo.toLowerCase() : '';
+        const descricao = caso.descricao ? caso.descricao.toLowerCase() : '';
+
+        return titulo.includes(palavraChave) || descricao.includes(palavraChave);
+    });
+    return casosFiltrados
+}
 
 
 module.exports  = {
   findAll,
   findById,
   criarCaso,
-  deleteCaso
+  deleteCaso,
+  buscaPalavraEmCaso
 }
